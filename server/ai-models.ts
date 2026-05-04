@@ -132,7 +132,7 @@ export async function invokeModel(
     temperature: 0.85,
   };
 
-  const response = await fetch(config.endpoint, {
+  let response = await fetch(config.endpoint, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -140,6 +140,31 @@ export async function invokeModel(
     },
     body: JSON.stringify(payload),
   });
+
+  // If OpenAI returns 403 model_not_found, fallback to Groq
+  if (!response.ok && modelType === "gpt" && ENV.openAiApiKey && ENV.groqApiKey) {
+    const errorText = await response.text();
+    if (errorText.includes("model_not_found") || response.status === 403) {
+      const groqPayload = {
+        model: "openai/gpt-oss-120b",
+        messages: fullMessages.map(m => ({ role: m.role, content: m.content })),
+        max_tokens: 512,
+        temperature: 0.85,
+      };
+      response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${ENV.groqApiKey}`,
+        },
+        body: JSON.stringify(groqPayload),
+      });
+      if (response.ok) {
+        return (await response.json()) as InvokeResult;
+      }
+    }
+    throw new Error(`${modelType} invoke failed: ${response.status} – ${errorText}`);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
