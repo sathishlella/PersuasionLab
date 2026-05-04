@@ -490,9 +490,19 @@ export default function Analytics() {
               <span className="font-semibold text-sm">Research Analytics</span>
             </div>
           </div>
-          <Button size="sm" onClick={() => navigate("/chat")} className="bg-accent text-accent-foreground hover:bg-accent/90 text-xs">
-            <MessageSquare className="w-3.5 h-3.5 mr-1.5" /> New Session
-          </Button>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.linkedin.com/in/sathishlella/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline text-[10px] text-muted-foreground/40 hover:text-accent/70 transition-colors duration-200"
+            >
+              Designed by <span className="underline underline-offset-2 decoration-transparent hover:decoration-accent/40">Sathish Lella</span>
+            </a>
+            <Button size="sm" onClick={() => navigate("/chat")} className="bg-accent text-accent-foreground hover:bg-accent/90 text-xs">
+              <MessageSquare className="w-3.5 h-3.5 mr-1.5" /> New Session
+            </Button>
+          </div>
         </div>
       </header>
 
