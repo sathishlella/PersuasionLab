@@ -158,7 +158,7 @@ export default function Home() {
       <footer className="py-8 border-t border-border/50">
         <div className="container text-center space-y-2">
           <p className="text-sm text-muted-foreground">
-            PersuasionLab — Academic Research Platform for AI Behavioral Studies
+            AI Physical Store Salesman Simulator — In-Store Persuasion & Behavioral Research Platform
           </p>
           <p className="text-xs text-muted-foreground/50">
             Designed by{" "}
