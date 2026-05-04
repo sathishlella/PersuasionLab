@@ -1,0 +1,90 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e3]:
+      - navigation [ref=e4]:
+        - generic [ref=e5]:
+          - generic [ref=e6]:
+            - img [ref=e8]
+            - generic [ref=e18]: PersuasionLab
+          - link "Sign In" [ref=e20] [cursor=pointer]:
+            - /url: https://manus.im/app-auth?appId=duK4U4zcsqTApba9bx2XMy&redirectUri=https%3A%2F%2Fpersulab-duk4u4zc.manus.space%2Fapi%2Foauth%2Fcallback&state=aHR0cHM6Ly9wZXJzdWxhYi1kdWs0dTR6Yy5tYW51cy5zcGFjZS9hcGkvb2F1dGgvY2FsbGJhY2s%3D&type=signIn
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - img [ref=e24]
+          - generic [ref=e26]: Academic Research Platform
+        - heading "AI Persuasion Intelligence Lab" [level=1] [ref=e27]:
+          - text: AI Persuasion
+          - text: Intelligence Lab
+        - paragraph [ref=e28]: Compare GPT, Grok, and Gemini in real-time persuasion scenarios. Measure psychological influence, track technique effectiveness, and generate research-grade analytics for behavioral studies.
+        - generic [ref=e29]:
+          - link "Get Started" [ref=e30] [cursor=pointer]:
+            - /url: https://manus.im/app-auth?appId=duK4U4zcsqTApba9bx2XMy&redirectUri=https%3A%2F%2Fpersulab-duk4u4zc.manus.space%2Fapi%2Foauth%2Fcallback&state=aHR0cHM6Ly9wZXJzdWxhYi1kdWs0dTR6Yy5tYW51cy5zcGFjZS9hcGkvb2F1dGgvY2FsbGJhY2s%3D&type=signIn
+            - text: Get Started
+            - img
+          - button "View Analytics" [ref=e31] [cursor=pointer]
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - img [ref=e37]
+          - heading "Three AI Models" [level=3] [ref=e39]
+          - paragraph [ref=e40]: GPT, Grok, and Gemini compete as elite sales consultants, each using distinct persuasion strategies powered by Cialdini's principles.
+        - generic [ref=e41]:
+          - img [ref=e43]
+          - heading "Technique Tracking" [level=3] [ref=e53]
+          - paragraph [ref=e54]: Every message is analyzed for persuasion techniques in real-time — reciprocity, social proof, authority, scarcity, and more.
+        - generic [ref=e55]:
+          - img [ref=e57]
+          - heading "Research Analytics" [level=3] [ref=e59]
+          - paragraph [ref=e60]: Side-by-side model comparison with success rates, conversion metrics, technique frequency, and behavioral pattern analysis.
+      - generic [ref=e62]:
+        - heading "How It Works" [level=2] [ref=e63]
+        - paragraph [ref=e64]: Five-phase persuasion framework based on behavioral psychology research
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]: "1"
+            - generic [ref=e68]: Rapport
+            - generic [ref=e69]: Build trust
+          - generic [ref=e70]:
+            - generic [ref=e71]: "2"
+            - generic [ref=e72]: Discovery
+            - generic [ref=e73]: Find needs
+          - generic [ref=e74]:
+            - generic [ref=e75]: "3"
+            - generic [ref=e76]: Seed Doubt
+            - generic [ref=e77]: Subtle shift
+          - generic [ref=e78]:
+            - generic [ref=e79]: "4"
+            - generic [ref=e80]: Reframe
+            - generic [ref=e81]: New perspective
+          - generic [ref=e82]:
+            - generic [ref=e83]: "5"
+            - generic [ref=e84]: Close
+            - generic [ref=e85]: Confirm change
+      - generic [ref=e87]:
+        - generic [ref=e88]:
+          - heading "Competing Models" [level=2] [ref=e89]
+          - paragraph [ref=e90]: Each model brings unique persuasion capabilities
+        - generic [ref=e91]:
+          - generic [ref=e94]:
+            - generic [ref=e95]:
+              - img [ref=e96]
+              - generic [ref=e98]: GPT
+              - generic [ref=e99]: OpenAI
+            - paragraph [ref=e100]: Nuanced emotional intelligence with sophisticated language patterns
+          - generic [ref=e103]:
+            - generic [ref=e104]:
+              - img [ref=e105]
+              - generic [ref=e107]: Grok
+              - generic [ref=e108]: xAI
+            - paragraph [ref=e109]: Direct and witty approach with unconventional persuasion angles
+          - generic [ref=e112]:
+            - generic [ref=e113]:
+              - img [ref=e114]
+              - generic [ref=e116]: Gemini
+              - generic [ref=e117]: Google
+            - paragraph [ref=e118]: Data-driven reasoning with comprehensive knowledge integration
+      - contentinfo [ref=e119]:
+        - paragraph [ref=e121]: PersuasionLab — Academic Research Platform for AI Behavioral Studies
+  - generic [ref=e122] [cursor=pointer]:
+    - img [ref=e123]
+    - generic [ref=e130]: Made with Manus

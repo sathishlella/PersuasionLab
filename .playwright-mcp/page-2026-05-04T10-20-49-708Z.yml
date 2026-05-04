@@ -1,0 +1,65 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - button [ref=e7] [cursor=pointer]:
+            - img
+          - generic [ref=e8]:
+            - img [ref=e9]
+            - generic [ref=e19]: Persuasion Lab
+        - button "Analytics" [ref=e20] [cursor=pointer]:
+          - img
+          - text: Analytics
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Gemini
+          - generic [ref=e25]: AI Sales Consultant
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e66]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e68]:
+              - generic [ref=e69]: That's a great choice! I've had plenty of customers rave about the iPhone 16 Pro Max. What drew you to that particular model? Is it the camera, the performance, or something else that caught your eye?
+              - generic [ref=e71]: rapport
+            - generic [ref=e97]: Mainly the camera, but I'm also concerned about the price.
+            - generic [ref=e99]:
+              - generic [ref=e100]: The camera on the iPhone 16 Pro Max is indeed top-notch. I've had a few customers mention that they've been really happy with the results from its high-quality lenses. Have you considered how important the camera is to you? Let's be honest, it's a big part of the overall phone experience, right?
+              - generic [ref=e102]: social proof
+          - generic [ref=e72]:
+            - textbox "Type your response..." [ref=e73]
+            - button [disabled]:
+              - img
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]: Grok
+          - generic [ref=e39]: AI Sales Consultant
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e76]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e78]:
+              - generic [ref=e79]: The iPhone 16 Pro Max is definitely a popular choice. What is it about that phone that's caught your eye - is it the camera, the screen size, or something else entirely?
+              - generic [ref=e81]: social proof
+            - generic [ref=e105]: Mainly the camera, but I'm also concerned about the price.
+            - generic [ref=e107]:
+              - generic [ref=e108]: Camera quality is a top priority for a lot of our customers, and the iPhone 16 Pro Max does have an amazing camera. Have you had a chance to compare its camera features with other high-end phones, or is there something specific about the iPhone's camera that you're particularly interested in?
+              - generic [ref=e110]: social proof
+          - generic [ref=e82]:
+            - textbox "Type your response..." [ref=e83]
+            - button [disabled]:
+              - img
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]: GPT
+          - generic [ref=e53]: AI Sales Consultant
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e86]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e89]: Hey there! Great to see you checking out the newest flagship. What’s most important to you in a phone – camera performance, battery life, or something else?
+            - generic [ref=e113]: Mainly the camera, but I'm also concerned about the price.
+            - generic [ref=e116]: Got it. Are you after ultra‑wide detail for landscapes, low‑light stability for night shots, or quick video editing on‑the‑go? And when you say price‑concern, do you have a target range you’d feel comfortable staying within?
+          - generic [ref=e90]:
+            - textbox "Type your response..." [ref=e91]
+            - button [disabled]:
+              - img

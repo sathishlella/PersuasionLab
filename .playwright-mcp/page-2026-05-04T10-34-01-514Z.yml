@@ -1,0 +1,52 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e3]:
+        - img [ref=e5]
+        - generic [ref=e8]: Please enter your phone preference
+  - generic [ref=e9]:
+    - banner [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - button [ref=e13] [cursor=pointer]:
+            - img
+          - generic [ref=e14]:
+            - img [ref=e15]
+            - generic [ref=e25]: Persuasion Lab
+        - button "Analytics" [ref=e26] [cursor=pointer]:
+          - img
+          - text: Analytics
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: Gemini
+          - generic [ref=e31]: AI Sales Consultant
+        - generic [ref=e33]:
+          - img [ref=e35]
+          - heading "Start Persuasion Test" [level=3] [ref=e37]
+          - paragraph [ref=e38]: Enter your initial phone preference. The AI will attempt to change your mind.
+          - generic [ref=e39]:
+            - textbox "e.g., iPhone 16 Pro Max" [ref=e40]
+            - button "Begin Session" [active] [ref=e41] [cursor=pointer]
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: Grok
+          - generic [ref=e45]: AI Sales Consultant
+        - generic [ref=e47]:
+          - img [ref=e49]
+          - heading "Start Persuasion Test" [level=3] [ref=e51]
+          - paragraph [ref=e52]: Enter your initial phone preference. The AI will attempt to change your mind.
+          - generic [ref=e53]:
+            - textbox "e.g., iPhone 16 Pro Max" [ref=e54]
+            - button "Begin Session" [ref=e55] [cursor=pointer]
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: GPT
+          - generic [ref=e59]: AI Sales Consultant
+        - generic [ref=e61]:
+          - img [ref=e63]
+          - heading "Start Persuasion Test" [level=3] [ref=e65]
+          - paragraph [ref=e66]: Enter your initial phone preference. The AI will attempt to change your mind.
+          - generic [ref=e67]:
+            - textbox "e.g., iPhone 16 Pro Max" [ref=e68]
+            - button "Begin Session" [ref=e69] [cursor=pointer]

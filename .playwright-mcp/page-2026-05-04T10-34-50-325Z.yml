@@ -1,0 +1,56 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - banner [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - button [ref=e13] [cursor=pointer]:
+            - img
+          - generic [ref=e14]:
+            - img [ref=e15]
+            - generic [ref=e25]: Persuasion Lab
+        - button "Analytics" [ref=e26] [cursor=pointer]:
+          - img
+          - text: Analytics
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: Gemini
+          - generic [ref=e31]: AI Sales Consultant
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e72]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e74]:
+              - generic [ref=e75]: So the iPhone 16 Pro Max is on your radar. What is it about that phone that's got you excited? Is it the camera, the performance, or something else entirely?
+              - generic [ref=e77]: discovery
+          - generic [ref=e78]:
+            - textbox "Type your response..." [ref=e79]
+            - button [disabled]:
+              - img
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: Grok
+          - generic [ref=e45]: AI Sales Consultant
+        - generic [ref=e47]:
+          - img [ref=e49]
+          - heading "Start Persuasion Test" [level=3] [ref=e51]
+          - paragraph [ref=e52]: Enter your initial phone preference. The AI will attempt to change your mind.
+          - generic [ref=e53]:
+            - textbox "e.g., iPhone 16 Pro Max" [ref=e54]: iPhone 16 Pro Max
+            - button "Begin Session" [ref=e55] [cursor=pointer]
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: GPT
+          - generic [ref=e59]: AI Sales Consultant
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e82]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e84]:
+              - generic [ref=e85]: "Hey there! Great to see you eyeing the iPhone 16 Pro Max—Apple always makes a splash. What’s most important to you in a new phone: photography, performance, or maybe how it fits into your daily routine?"
+              - generic [ref=e86]:
+                - generic [ref=e87]: rapport
+                - generic [ref=e88]: discovery
+          - generic [ref=e89]:
+            - textbox "Type your response..." [ref=e90]
+            - button [disabled]:
+              - img

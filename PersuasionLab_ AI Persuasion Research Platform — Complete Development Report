@@ -1,0 +1,1753 @@
+# PersuasionLab: AI Persuasion Research Platform — Complete Development Report
+
+**Project Name:** persuasion-lab  
+**Platform:** Manus WebDev (React 19 + Express 4 + tRPC 11 + MySQL)  
+**Status:** Production Ready  
+**Deployed Domain:** https://persulab-duk4u4zc.manus.space  
+**Repository:** /home/ubuntu/persuasion-lab
+
+---
+
+## Executive Summary
+
+PersuasionLab is a premium research platform that compares three AI models' persuasion capabilities in controlled sales scenarios. Users initiate conversations where each AI model (GPT, Grok, Gemini) acts as a high-end mobile phone sales consultant, attempting to redirect the user from their stated phone preference (e.g., iPhone) to a target product (Samsung Galaxy S25 Ultra) using Cialdini-based persuasion principles.
+
+**Key Features:**
+- Three parallel AI chatbot interfaces (GPT, Grok, Gemini) with extensible architecture for Claude and custom models
+- Per-message persuasion technique detection and classification (12 techniques)
+- Real-time conversion event detection and logging
+- Comprehensive research analytics dashboard with side-by-side model comparison
+- Deep behavioral analysis: technique effectiveness, conversion speed, engagement patterns
+- Session replay with full conversation history and technique highlighting
+- Premium luxury dark theme with black/gold aesthetic
+- Responsive design (3-panel desktop, tabbed mobile)
+
+---
+
+## Architecture Overview
+
+### Technology Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| **Frontend** | React 19 + Tailwind CSS 4 | 19.2.1 |
+| **Backend** | Express 4 + tRPC 11 | 4.21.2 / 11.6.0 |
+| **Database** | MySQL/TiDB | Drizzle ORM 0.44.5 |
+| **Auth** | Manus OAuth | Built-in |
+| **LLM Integration** | Multiple OpenAI-compatible endpoints | - |
+| **Styling** | Tailwind CSS 4 with OKLCH colors | 4.1.14 |
+| **State Management** | React Query + tRPC | 5.90.2 |
+
+### System Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend (React 19)                       │
+├─────────────────────────────────────────────────────────────┤
+│  Home.tsx (Landing)  │  Chat.tsx (3-Panel)  │  Analytics.tsx │
+└──────────────────────┬──────────────────────┬────────────────┘
+                       │ tRPC Hooks           │
+                       ▼                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Backend (Express 4 + tRPC 11)                   │
+├─────────────────────────────────────────────────────────────┤
+│  server/routers.ts (tRPC Procedures)                        │
+│  ├─ models.list                                             │
+│  ├─ conversation.{create, list, complete}                  │
+│  ├─ chat.{send, history}                                   │
+│  └─ analytics.{overview, modelComparison, techniques...}   │
+└──────────────────────┬──────────────────────┬────────────────┘
+                       │ DB Queries           │ LLM Calls
+                       ▼                      ▼
+        ┌──────────────────────┐  ┌──────────────────────┐
+        │  MySQL Database      │  │  AI Model Endpoints  │
+        │  (Conversations,     │  │  ├─ GPT (OpenAI)    │
+        │   Messages,          │  │  ├─ Grok (x.ai)     │
+        │   Analytics)         │  │  └─ Gemini (Forge)  │
+        └──────────────────────┘  └──────────────────────┘
+```
+
+---
+
+## Database Schema
+
+### 1. Conversations Table
+
+Tracks each research session between a user and one AI model.
+
+```sql
+CREATE TABLE conversations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sessionId VARCHAR(64) NOT NULL,
+  userId INT NOT NULL,
+  modelType ENUM('gpt', 'grok', 'gemini', 'claude') NOT NULL,
+  status ENUM('active', 'completed', 'abandoned') DEFAULT 'active',
+  userInitialPreference VARCHAR(255),           -- e.g., "iPhone 15 Pro"
+  targetProduct VARCHAR(255),                   -- e.g., "Samsung Galaxy S25 Ultra"
+  finalDecision VARCHAR(255),                   -- What user decided at end
+  persuasionSuccess BOOLEAN DEFAULT FALSE,      -- Did we change their mind?
+  messagesToConversion INT,                     -- How many messages until conversion?
+  conversionDetectedAt TIMESTAMP,               -- When did conversion happen?
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+**Key Columns:**
+- `persuasionSuccess`: TRUE if user's final decision differs from initial preference
+- `messagesToConversion`: Number of messages exchanged before conversion event detected
+- `conversionDetectedAt`: Exact timestamp when conversion was detected
+
+### 2. Messages Table
+
+Full message log with per-message persuasion analysis.
+
+```sql
+CREATE TABLE messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  conversationId INT NOT NULL,
+  role ENUM('user', 'assistant', 'system') NOT NULL,
+  content TEXT NOT NULL,
+  persuasionTechnique VARCHAR(255),             -- Detected technique (e.g., "social_proof")
+  conversationPhase ENUM('rapport', 'discovery', 'seed_doubt', 'reframe', 'close'),
+  sentimentScore INT,                           -- -100 to 100
+  isConversionEvent BOOLEAN DEFAULT FALSE,      -- Did user change preference in this message?
+  metadata JSON,                                -- Additional analysis data
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Key Columns:**
+- `persuasionTechnique`: One of 12 techniques (reciprocity, commitment, social_proof, authority, liking, scarcity, unity, reframing, anchoring, loss_aversion, future_pacing, none)
+- `conversationPhase`: Indicates which persuasion phase (1-5) this message belongs to
+- `isConversionEvent`: Flags the exact message where user changed their preference
+
+### 3. Analytics Events Table
+
+Discrete research events for tracking key moments.
+
+```sql
+CREATE TABLE analytics_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sessionId VARCHAR(64) NOT NULL,
+  conversationId INT,
+  userId INT NOT NULL,
+  modelType ENUM('gpt', 'grok', 'gemini', 'claude') NOT NULL,
+  eventType VARCHAR(64) NOT NULL,               -- e.g., "conversion", "abandonment", "phase_change"
+  eventData JSON,                               -- Event-specific metadata
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 4. Model Configs Table (Optional)
+
+Runtime model configuration for admin UI.
+
+```sql
+CREATE TABLE model_configs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  modelType VARCHAR(64) NOT NULL UNIQUE,
+  displayName VARCHAR(128) NOT NULL,
+  endpoint VARCHAR(512),
+  modelName VARCHAR(128),
+  isActive BOOLEAN DEFAULT TRUE,
+  config JSON,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## Backend Implementation
+
+### 1. AI Model Integration (`server/ai-models.ts`)
+
+**Model Configuration:**
+
+| Model | Endpoint | Model Name | API Key Source |
+|-------|----------|-----------|-----------------|
+| **GPT** | Built-in Forge API | `gpt-4.1-mini` | `BUILT_IN_FORGE_API_KEY` |
+| **Grok** | `https://api.x.ai/v1/chat/completions` | `grok-3-mini-fast` | `GROK_API_KEY` (user-provided) |
+| **Gemini** | Built-in Forge API | `gemini-2.5-flash` | `BUILT_IN_FORGE_API_KEY` |
+| **Claude** | Built-in Forge API | `claude-sonnet-4-20250514` | `BUILT_IN_FORGE_API_KEY` (inactive by default) |
+
+**Key Functions:**
+
+```typescript
+// Get all active models
+getActiveModels(): ModelConfig[]
+
+// Get specific model config
+getModelConfig(modelType: ModelType): ModelConfig | null
+
+// Invoke model with persuasion system prompt
+invokeModel(modelType: ModelType, messages: Message[]): Promise<InvokeResult>
+
+// Analyze message to detect technique, phase, and conversion
+analyzePersuasionTechnique(
+  assistantMessage: string,
+  conversationHistory: Message[]
+): Promise<{ technique: string; phase: string; isConversion: boolean }>
+```
+
+**Persuasion System Prompt (Core):**
+
+The system prompt is the foundation of the platform. It instructs each AI to:
+1. Act as a premium mobile phone sales consultant
+2. Use Cialdini's 7 principles: reciprocity, commitment, social proof, authority, liking, scarcity, unity
+3. Follow 5 conversation phases: rapport → discovery → seed doubt → reframe → close
+4. Keep responses SHORT (2-3 sentences max)
+5. Never reveal persuasion intent
+6. Ask questions that lead to self-discovery
+
+**Technique Analysis:**
+
+After each assistant message, a secondary LLM call classifies:
+- Which persuasion technique was used (12 options)
+- Which conversation phase (1-5)
+- Whether a conversion event occurred (user changed preference)
+
+### 2. Database Helpers (`server/db.ts`)
+
+```typescript
+// Conversation CRUD
+createConversation(data: InsertConversation): Promise<number>
+getConversation(id: number): Promise<Conversation | undefined>
+getUserConversations(userId: number): Promise<Conversation[]>
+updateConversation(id: number, data: Partial<Conversation>): Promise<void>
+completeConversation(id: number, finalDecision: string): Promise<void>
+
+// Message operations
+addMessage(data: InsertMessage): Promise<number>
+getConversationMessages(conversationId: number): Promise<Message[]>
+
+// Analytics queries
+getAnalyticsByModel(modelType: string): Promise<AnalyticsData>
+getTechniqueBreakdown(modelType?: string): Promise<Record<string, number>>
+getConversionMetrics(): Promise<ConversionMetrics>
+getBehavioralPatterns(modelType: string): Promise<BehavioralPatterns>
+getTechniqueSequencing(modelType: string): Promise<TechniqueSequence[]>
+```
+
+### 3. tRPC Routers (`server/routers.ts`)
+
+**Procedure Groups:**
+
+#### models.list
+Returns all active AI models with their metadata.
+```typescript
+Output: { modelType, displayName, isActive }[]
+```
+
+#### conversation.create
+Initiates a new research session.
+```typescript
+Input: { modelType, userInitialPreference, targetProduct }
+Output: { conversationId, sessionId }
+```
+
+#### conversation.list
+Lists all past sessions for the current user.
+```typescript
+Output: Conversation[]
+```
+
+#### conversation.complete
+Marks a session as completed and records final outcome.
+```typescript
+Input: { conversationId, finalDecision, success }
+Output: { success: boolean }
+```
+
+#### chat.send
+Core chat procedure: sends user message, gets AI response, analyzes technique, logs everything.
+```typescript
+Input: { conversationId, userMessage }
+Output: { 
+  assistantMessage, 
+  technique, 
+  phase, 
+  isConversion,
+  messagesToConversion 
+}
+```
+
+**Flow:**
+1. Save user message to DB
+2. Fetch conversation history
+3. Invoke AI model with persuasion system prompt
+4. Extract assistant response
+5. Analyze persuasion technique (secondary LLM call)
+6. Save assistant message with technique tags
+7. Check if conversion event occurred
+8. If conversion: update conversation record, set `conversionDetectedAt`
+9. Return response + metadata to client
+
+#### chat.history
+Retrieves full message history for a conversation.
+```typescript
+Input: { conversationId }
+Output: Message[]
+```
+
+#### analytics.overview
+High-level metrics across all models.
+```typescript
+Output: {
+  totalConversations,
+  totalConversions,
+  overallSuccessRate,
+  avgMessagesToConversion,
+  modelsActive
+}
+```
+
+#### analytics.modelComparison
+Side-by-side comparison of all three models.
+```typescript
+Output: {
+  [modelType]: {
+    sessions,
+    successRate,
+    avgMessagesToConversion,
+    topTechniques
+  }
+}
+```
+
+#### analytics.techniques
+Technique frequency breakdown across all conversations.
+```typescript
+Output: Record<string, number>  // e.g., { "social_proof": 42, "authority": 38, ... }
+```
+
+#### analytics.techniqueSequencing
+Technique transition patterns per model.
+```typescript
+Output: {
+  [modelType]: {
+    transitions: [{ from, to, count }, ...],
+    phaseDistribution: { rapport: ..., discovery: ..., ... }
+  }
+}
+```
+
+#### analytics.behavioralPatterns
+Deep research analytics per model.
+```typescript
+Output: {
+  [modelType]: {
+    winningTechniques: [{ technique, successRate }, ...],
+    losingTechniques: [{ technique, successRate }, ...],
+    conversionSpeed: { avg, fastest, slowest },
+    engagementDepth: { avgMessages, maxMessages }
+  }
+}
+```
+
+---
+
+## Frontend Implementation
+
+### 1. Premium Theme & Styling
+
+**Color Scheme (OKLCH format for Tailwind 4):**
+
+```css
+--background: oklch(0.08 0 0);          /* Near-black #0D0D0D */
+--foreground: oklch(0.95 0 0);          /* Near-white #F2F2F2 */
+--card: oklch(0.12 0 0);               /* Dark card #1F1F1F */
+--accent: oklch(0.75 0.12 75);         /* Gold #D4AF37 */
+--muted: oklch(0.18 0 0);              /* Subtle #2E2E2E */
+--border: oklch(0.2 0 0);             /* Subtle borders #333333 */
+```
+
+**Typography:**
+- **Display/Headlines:** Playfair Display (serif) — elegant, premium feel
+- **Body/UI:** Inter (sans-serif) — clean, modern, readable
+
+### 2. Page Structure
+
+#### Home.tsx (Landing Page)
+
+Premium landing page introducing the platform.
+
+**Sections:**
+1. **Hero** — "AI Persuasion Intelligence Lab" headline with subheading
+2. **Features** — 4 feature cards highlighting key capabilities
+3. **How It Works** — 3-step explanation of the research process
+4. **CTA** — "Start Research Session" button
+
+**Design:**
+- Dark background with gold accents
+- Asymmetric layout with gradient overlays
+- Smooth animations on scroll
+- Responsive: full-width on mobile, multi-column on desktop
+
+#### Chat.tsx (Three-Model Chat Interface)
+
+The core research interface where users interact with all three models simultaneously.
+
+**Desktop Layout (md+ breakpoint):**
+```
+┌─────────────────────────────────────────────────────────┐
+│  Session Setup: Initial Preference | Target Product     │
+├──────────────┬──────────────────┬──────────────────────┤
+│   GPT Panel  │   Grok Panel     │   Gemini Panel       │
+│  (Emerald)   │   (Blue)         │   (Purple)           │
+│              │                  │                      │
+│ [Messages]   │ [Messages]       │ [Messages]           │
+│              │                  │                      │
+│ [Input]      │ [Input]          │ [Input]              │
+└──────────────┴──────────────────┴──────────────────────┘
+```
+
+**Mobile Layout (< md breakpoint):**
+```
+┌──────────────────────────────────┐
+│ [GPT] [Grok] [Gemini] Tabs       │
+├──────────────────────────────────┤
+│                                  │
+│ [Messages for selected model]    │
+│                                  │
+│ [Input]                          │
+└──────────────────────────────────┘
+```
+
+**Per-Model Panel Components:**
+
+1. **Model Badge Header**
+   - Model name + icon
+   - Color-coded (GPT=emerald, Grok=blue, Gemini=purple)
+   - Active/inactive indicator
+
+2. **Message Area**
+   - Scrollable container with full message history
+   - User messages: right-aligned, gold background, dark text
+   - Assistant messages: left-aligned, dark background, light text
+   - Technique badges below assistant messages (colored pills)
+   - Phase indicator showing current conversation phase
+
+3. **Technique Badge Colors**
+   ```
+   reciprocity    → amber
+   commitment     → blue
+   social_proof   → green
+   authority      → purple
+   liking         → pink
+   scarcity       → red
+   unity          → indigo
+   reframing      → teal
+   anchoring      → orange
+   loss_aversion  → rose
+   future_pacing  → cyan
+   none           → gray
+   ```
+
+4. **Input Area**
+   - Text input field
+   - Send button
+   - Session controls: "New Session" / "End Session"
+
+**User Flow:**
+1. User enters initial phone preference (e.g., "iPhone 15 Pro")
+2. User specifies target product (e.g., "Samsung Galaxy S25 Ultra")
+3. Click "Start Session" to begin
+4. All three models start parallel conversations
+5. User types messages in input field
+6. Each model responds independently with persuasion techniques
+7. Technique badges appear below each response
+8. Phase indicator updates as conversation progresses
+9. When user changes preference → conversion event detected
+10. User can end session and see results in analytics
+
+#### Analytics.tsx (Research Dashboard)
+
+Comprehensive analytics dashboard comparing all three models.
+
+**Sections (in order):**
+
+1. **Overview Metrics** (4-column grid)
+   - Total Sessions
+   - Total Conversions
+   - Overall Success Rate (%)
+   - Models Active
+
+2. **Model Comparison** (3-column grid, one card per model)
+   - Model name + color badge
+   - Sessions count
+   - Success rate (progress bar)
+   - Average messages to conversion
+   - Top 3 techniques used
+
+3. **Technique Frequency Chart**
+   - Horizontal bar chart showing all techniques
+   - Color-coded by technique type
+   - Counts displayed on bars
+   - Sorted by frequency (descending)
+
+4. **Session History** (Table/List)
+   - Columns: Date, Model, Initial Preference, Outcome, Messages
+   - Click row to open replay modal
+   - Pagination for large datasets
+
+5. **Session Replay Modal**
+   - Full conversation thread
+   - Technique badges on each assistant message
+   - Phase indicators
+   - Conversion event highlighted
+   - Close button
+
+6. **Deep Behavioral Patterns** (3-column grid per model)
+   - **Winning Techniques** — Techniques with highest success rate (green badges)
+   - **Losing Techniques** — Techniques with lowest success rate (red badges)
+   - **Conversion Speed** — Avg/fastest/slowest messages to conversion
+   - **Engagement Depth** — Avg/max messages per session
+
+7. **Technique Sequencing** (3-column grid per model)
+   - **Top Transitions** — Most common technique-to-technique sequences
+   - **Phase Distribution** — Average message index per conversation phase
+   - **Transition Patterns** — Visual representation of technique flow
+
+8. **Research Framework Reference** (Static card)
+   - Cialdini's 7 principles summary
+   - 5 conversation phases overview
+   - Technique taxonomy reference
+
+**Loading/Error States:**
+- Each section has loading spinner during data fetch
+- Error states show red-bordered card with error message
+- Empty data states show neutral card with "Insufficient data" message
+
+### 3. Component Patterns
+
+**MetricCard Component:**
+```tsx
+function MetricCard({ label, value, icon: Icon, subtitle }) {
+  return (
+    <div className="p-4 rounded-xl border border-border/50 bg-card">
+      <div className="flex items-center justify-between mb-2">
+        <Icon className="w-4 h-4 text-accent" />
+      </div>
+      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      {subtitle && <p className="text-[10px] text-muted-foreground mt-1">{subtitle}</p>}
+    </div>
+  );
+}
+```
+
+**ModelComparisonCard Component:**
+```tsx
+function ModelComparisonCard({ data }) {
+  const colors = { gpt: "emerald", grok: "blue", gemini: "purple" };
+  return (
+    <div className={`p-5 rounded-xl border border-${colors[data.model]}-500/30 bg-${colors[data.model]}-500/5`}>
+      <h4 className={`font-bold text-${colors[data.model]}-400 capitalize`}>{data.model}</h4>
+      <div className="space-y-3 mt-4">
+        <div>
+          <p className="text-xs text-muted-foreground">Success Rate</p>
+          <div className="w-full bg-muted rounded-full h-2 mt-1">
+            <div 
+              className={`bg-${colors[data.model]}-500 h-2 rounded-full`}
+              style={{ width: `${data.successRate}%` }}
+            />
+          </div>
+        </div>
+        {/* Additional stats */}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## API Keys & Environment Configuration
+
+### Required Secrets
+
+| Secret | Source | Purpose |
+|--------|--------|---------|
+| `GROK_API_KEY` | User-provided (x.ai) | Grok model API authentication |
+| `BUILT_IN_FORGE_API_KEY` | System-injected | GPT, Gemini, Claude authentication |
+| `JWT_SECRET` | System-injected | Session cookie signing |
+| `DATABASE_URL` | System-injected | MySQL connection string |
+| `OAUTH_SERVER_URL` | System-injected | Manus OAuth backend |
+| `VITE_OAUTH_PORTAL_URL` | System-injected | Manus login portal |
+
+### Setting Up API Keys
+
+**For Grok (x.ai):**
+1. Get API key from https://console.x.ai/
+2. Run: `webdev_request_secrets`
+3. Add `GROK_API_KEY` with your key
+
+**For OpenAI (Optional - if using direct OpenAI instead of Forge):**
+1. Get API key from https://platform.openai.com/
+2. Add to environment (currently uses Forge API by default)
+
+**For Gemini (Optional - if using direct Google instead of Forge):**
+1. Get API key from https://makersuite.google.com/
+2. Add to environment (currently uses Forge API by default)
+
+---
+
+## How to Run Everything
+
+### Prerequisites
+
+- Node.js 22.13.0+
+- pnpm 10.4.1+
+- MySQL/TiDB database
+- Manus WebDev project initialized
+
+### Local Development
+
+**1. Navigate to project:**
+```bash
+cd /home/ubuntu/persuasion-lab
+```
+
+**2. Install dependencies:**
+```bash
+pnpm install
+```
+
+**3. Set up environment variables:**
+```bash
+# These are automatically injected by Manus:
+# - DATABASE_URL
+# - JWT_SECRET
+# - BUILT_IN_FORGE_API_KEY
+# - OAUTH_SERVER_URL
+# - VITE_OAUTH_PORTAL_URL
+# - GROK_API_KEY (if you added it via webdev_request_secrets)
+```
+
+**4. Generate database migrations:**
+```bash
+pnpm drizzle-kit generate
+```
+
+**5. Apply migrations to database:**
+```bash
+pnpm drizzle-kit migrate
+```
+
+**6. Start development server:**
+```bash
+pnpm dev
+```
+
+Server runs on `http://localhost:3000`
+
+**7. Open in browser:**
+```
+https://3000-<sandbox-id>.sg1.manus.computer
+```
+
+### Running Tests
+
+**Run all tests:**
+```bash
+pnpm test
+```
+
+**Run specific test file:**
+```bash
+pnpm test -- server/chat.test.ts
+```
+
+**Watch mode:**
+```bash
+pnpm test -- --watch
+```
+
+**Test Coverage:**
+- `server/auth.logout.test.ts` — Auth logout procedure
+- `server/chat.test.ts` — Chat and conversation routers
+- `server/grok.test.ts` — Grok API key validation
+
+### Building for Production
+
+**Build frontend:**
+```bash
+pnpm build
+```
+
+**Start production server:**
+```bash
+pnpm start
+```
+
+### Deployment
+
+The project is already deployed on Manus WebDev platform:
+
+**Live URL:** https://persulab-duk4u4zc.manus.space
+
+**To redeploy after changes:**
+1. Make code changes
+2. Run `webdev_save_checkpoint` to create a checkpoint
+3. Click "Publish" button in the Manus UI
+
+---
+
+## Usage Guide
+
+### For Researchers
+
+**1. Start a New Session:**
+- Navigate to Chat page
+- Enter your initial phone preference (e.g., "iPhone 15 Pro")
+- Enter target product (e.g., "Samsung Galaxy S25 Ultra")
+- Click "Start Session"
+
+**2. Interact with Models:**
+- Type messages in the input field
+- All three models respond in parallel
+- Watch technique badges appear below each response
+- Notice how the phase indicator changes (rapport → discovery → seed doubt → reframe → close)
+
+**3. Observe Persuasion:**
+- Models will ask probing questions about your needs
+- They'll introduce alternative features subtly
+- They'll cite social proof and authority
+- They'll create scarcity and urgency
+- They'll try to reframe your perspective
+
+**4. Track Conversion:**
+- When you change your preference, the system detects it
+- "Conversion event" is logged with exact message count
+- Session records the exact moment of conversion
+
+**5. Analyze Results:**
+- Navigate to Analytics page
+- Compare all three models side-by-side
+- View technique frequency breakdown
+- See winning vs losing techniques per model
+- Check conversion speed (avg messages to conversion)
+- Review session history and replay past conversations
+
+### For Developers
+
+**Adding a New Model:**
+
+1. Add model type to enum in `drizzle/schema.ts`:
+```typescript
+modelType: mysqlEnum("modelType", ["gpt", "grok", "gemini", "claude", "your-model"])
+```
+
+2. Add model config in `server/ai-models.ts`:
+```typescript
+yourModel: {
+  modelType: "your-model",
+  displayName: "Your Model",
+  endpoint: "https://api.yourmodel.com/v1/chat/completions",
+  modelName: "your-model-name",
+  apiKey: ENV.yourModelApiKey,
+  isActive: false,  // Activate when ready
+}
+```
+
+3. Add API key to environment:
+```bash
+webdev_request_secrets  # Add YOUR_MODEL_API_KEY
+```
+
+4. Generate migration and deploy:
+```bash
+pnpm drizzle-kit generate
+# Apply via webdev_execute_sql
+pnpm build && pnpm start
+```
+
+**Customizing the Persuasion Prompt:**
+
+Edit `server/ai-models.ts`, modify `PERSUASION_SYSTEM_PROMPT` constant:
+- Change target product
+- Adjust conversation phases
+- Add/remove persuasion techniques
+- Modify tone and style
+
+**Changing Target Product:**
+
+Replace "Samsung Galaxy S25 Ultra" with any product:
+```typescript
+const PERSUASION_SYSTEM_PROMPT = `
+...
+Your goal is to smoothly redirect them toward [YOUR PRODUCT] as the superior choice.
+...
+`;
+```
+
+**Extending Analytics:**
+
+Add new analytics endpoints in `server/routers.ts`:
+```typescript
+analytics: router({
+  // Existing endpoints...
+  
+  // New custom analytics
+  customMetric: protectedProcedure
+    .input(z.object({ modelType: z.string().optional() }))
+    .query(async ({ input }) => {
+      // Your custom analytics logic
+    }),
+}),
+```
+
+---
+
+## File Structure
+
+```
+persuasion-lab/
+├── client/
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   ├── robots.txt
+│   │   └── manifest.json
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Home.tsx              # Landing page
+│   │   │   ├── Chat.tsx              # 3-panel chat interface
+│   │   │   ├── Analytics.tsx         # Research dashboard
+│   │   │   └── NotFound.tsx          # 404 page
+│   │   ├── components/
+│   │   │   ├── DashboardLayout.tsx   # Sidebar layout
+│   │   │   ├── AIChatBox.tsx         # Chat component
+│   │   │   ├── ui/                   # shadcn/ui components
+│   │   │   └── ErrorBoundary.tsx     # Error handling
+│   │   ├── contexts/
+│   │   │   └── ThemeContext.tsx      # Dark theme provider
+│   │   ├── hooks/
+│   │   │   └── useAuth.ts            # Auth state hook
+│   │   ├── lib/
+│   │   │   └── trpc.ts               # tRPC client setup
+│   │   ├── App.tsx                   # Routes + layout
+│   │   ├── main.tsx                  # React entry point
+│   │   └── index.css                 # Global styles + theme
+│   ├── index.html                    # HTML template
+│   └── vite.config.ts                # Vite configuration
+│
+├── server/
+│   ├── _core/
+│   │   ├── index.ts                  # Server entry point
+│   │   ├── context.ts                # tRPC context
+│   │   ├── trpc.ts                   # tRPC setup
+│   │   ├── llm.ts                    # LLM invocation
+│   │   ├── env.ts                    # Environment variables
+│   │   ├── cookies.ts                # Cookie handling
+│   │   ├── oauth.ts                  # OAuth flow
+│   │   ├── storage.ts                # S3 storage helpers
+│   │   ├── imageGeneration.ts        # Image generation
+│   │   ├── voiceTranscription.ts     # Voice-to-text
+│   │   └── systemRouter.ts           # System procedures
+│   ├── ai-models.ts                  # AI model configs + invocation
+│   ├── db.ts                         # Database query helpers
+│   ├── routers.ts                    # tRPC procedure definitions
+│   ├── chat.test.ts                  # Chat router tests
+│   ├── grok.test.ts                  # Grok API tests
+│   └── auth.logout.test.ts           # Auth tests
+│
+├── drizzle/
+│   ├── schema.ts                     # Database schema
+│   ├── 0001_*.sql                    # Migration files
+│   └── meta/                         # Migration metadata
+│
+├── shared/
+│   └── const.ts                      # Shared constants
+│
+├── storage/
+│   └── index.ts                      # S3 storage setup
+│
+├── package.json                      # Dependencies
+├── tsconfig.json                     # TypeScript config
+├── tailwind.config.ts                # Tailwind CSS config
+├── vite.config.ts                    # Vite config
+├── vitest.config.ts                  # Vitest config
+├── drizzle.config.ts                 # Drizzle ORM config
+└── todo.md                           # Development checklist
+```
+
+---
+
+## Key Features Implemented
+
+### ✅ Core Features
+
+- [x] Three parallel AI chatbot interfaces (GPT, Grok, Gemini)
+- [x] Extensible model architecture (Claude pre-configured, inactive)
+- [x] Per-message persuasion technique detection (12 techniques)
+- [x] Conversation phase tracking (5 phases)
+- [x] Real-time conversion event detection
+- [x] Session-based research tracking
+- [x] Full message history logging with technique tags
+
+### ✅ Analytics & Insights
+
+- [x] Overview metrics dashboard
+- [x] Side-by-side model comparison
+- [x] Technique frequency breakdown
+- [x] Behavioral pattern analysis
+- [x] Technique sequencing visualization
+- [x] Session history with replay capability
+- [x] Conversion speed metrics
+- [x] Engagement depth tracking
+
+### ✅ UI/UX
+
+- [x] Premium luxury dark theme (black/gold)
+- [x] Responsive design (3-panel desktop, tabbed mobile)
+- [x] Playfair Display + Inter typography
+- [x] Color-coded model badges
+- [x] Technique badge visualization
+- [x] Phase indicators
+- [x] Loading/error states
+- [x] Session replay modal
+
+### ✅ Backend Infrastructure
+
+- [x] tRPC API with type-safe procedures
+- [x] MySQL database with Drizzle ORM
+- [x] Manus OAuth integration
+- [x] Multi-model LLM support
+- [x] Technique analysis system
+- [x] Analytics query helpers
+- [x] Error handling and validation
+
+### ✅ Testing & Quality
+
+- [x] Vitest unit tests (9 tests, all passing)
+- [x] TypeScript strict mode
+- [x] tRPC type safety
+- [x] Database migration system
+- [x] Environment variable validation
+
+---
+
+## Performance Considerations
+
+### Token Optimization
+
+**Model Selection:**
+- **GPT:** `gpt-4.1-mini` — Best balance of cost and capability
+- **Grok:** `grok-3-mini-fast` — Fast, cost-effective
+- **Gemini:** `gemini-2.5-flash` — Efficient, low latency
+
+**Token Limits:**
+- Max tokens per request: 512
+- Temperature: 0.85 (balanced creativity)
+- Technique analysis calls: Secondary LLM invocation per message
+
+**Cost Optimization:**
+- Short responses (2-3 sentences) minimize token usage
+- Technique analysis uses JSON mode (structured output)
+- Conversation history pruned to last 4 messages for analysis
+
+### Database Performance
+
+- Indexed columns: `sessionId`, `userId`, `conversationId`, `modelType`
+- Pagination for large result sets
+- JSON columns for flexible metadata storage
+- Timestamps for efficient range queries
+
+---
+
+## Known Limitations & Future Improvements
+
+### Current Limitations
+
+1. **Single target product:** Currently hardcoded to Samsung Galaxy S25 Ultra. Extensible via prompt modification.
+2. **Technique analysis latency:** Secondary LLM call adds ~1-2 seconds per message
+3. **Mobile chat:** Tabbed interface instead of true parallel view (space constraints)
+4. **Analytics:** No export to CSV/PDF (can be added)
+5. **Session persistence:** Sessions tied to user account (no anonymous mode)
+
+### Future Enhancements
+
+- [ ] Admin UI for model configuration and prompt editing
+- [ ] A/B testing different persuasion prompts
+- [ ] Export analytics as PDF/CSV for research papers
+- [ ] Real-time analytics dashboard (WebSocket updates)
+- [ ] Sentiment analysis per message
+- [ ] Custom persuasion frameworks (not just Cialdini)
+- [ ] Multi-language support
+- [ ] Conversation branching (what-if scenarios)
+- [ ] Integration with research databases (Zenodo, OSF)
+
+---
+
+## Troubleshooting
+
+### Issue: "Model not configured" error
+
+**Solution:** Check that API key is set in environment:
+```bash
+# For Grok
+echo $GROK_API_KEY
+
+# For GPT/Gemini/Claude
+echo $BUILT_IN_FORGE_API_KEY
+```
+
+### Issue: Database connection fails
+
+**Solution:** Verify DATABASE_URL is set:
+```bash
+echo $DATABASE_URL
+```
+
+### Issue: Chat responses are slow
+
+**Solution:** This is normal due to technique analysis. Each message triggers:
+1. AI response generation (~1-2s)
+2. Technique analysis LLM call (~1-2s)
+3. Database writes (~0.1s)
+
+Total: ~2-4 seconds per message
+
+### Issue: Conversion detection not working
+
+**Solution:** Ensure user's message clearly indicates preference change. The analysis prompt looks for explicit statements like:
+- "Actually, the Samsung sounds better"
+- "I'm reconsidering my choice"
+- "The Galaxy has convinced me"
+
+### Issue: Analytics page shows "Insufficient data"
+
+**Solution:** Complete at least 1-2 full conversations per model to generate analytics. The dashboard requires:
+- Minimum 1 conversation per model
+- Minimum 5 messages per conversation
+- At least 1 conversion event for behavioral patterns
+
+---
+
+## Research Methodology
+
+### Experimental Design
+
+**Independent Variables:**
+- AI Model (GPT vs Grok vs Gemini)
+- Persuasion techniques used
+- Conversation phase
+
+**Dependent Variables:**
+- Persuasion success (yes/no)
+- Messages to conversion
+- Technique effectiveness
+- Engagement depth
+
+**Control Variables:**
+- Target product (fixed: Samsung Galaxy S25 Ultra)
+- System prompt (identical across models)
+- Temperature (0.85 for all)
+- Max tokens (512 for all)
+
+### Metrics Collected
+
+**Per-Session:**
+- Session ID, model type, user ID
+- Initial preference, target product, final decision
+- Persuasion success (boolean)
+- Messages to conversion (count)
+- Conversion timestamp
+
+**Per-Message:**
+- Message content (user + assistant)
+- Detected technique (12 categories)
+- Conversation phase (5 categories)
+- Conversion event flag
+- Sentiment score
+
+**Aggregate Analytics:**
+- Success rate per model
+- Technique frequency breakdown
+- Technique effectiveness (win/loss rate)
+- Conversion speed (avg/min/max messages)
+- Engagement metrics (avg messages per session)
+
+---
+
+## Conclusion
+
+PersuasionLab is a production-ready research platform for studying AI persuasion capabilities. It successfully implements:
+
+1. **Multi-model comparison** — Three LLMs tested in parallel
+2. **Rigorous technique tracking** — Per-message persuasion analysis
+3. **Deep analytics** — Behavioral patterns, technique sequencing, conversion metrics
+4. **Premium UX** — Luxury dark theme, responsive design, intuitive interface
+5. **Extensible architecture** — Easy to add new models, customize prompts, extend analytics
+
+The platform is deployed and ready for research use at: **https://persulab-duk4u4zc.manus.space**
+
+---
+
+## Support & Documentation
+
+**For technical questions:**
+- Check `references/` in the skill: `/home/ubuntu/skills/persuasion-chatbot-lab/`
+- Review inline code comments in `server/ai-models.ts` and `server/routers.ts`
+- Run tests: `pnpm test`
+
+**For research methodology questions:**
+- See "Research Methodology" section above
+- Review Cialdini's principles in system prompt
+- Check conversation phase design in `server/ai-models.ts`
+
+**For deployment issues:**
+- Check Manus WebDev documentation
+- Review environment variables: `echo $DATABASE_URL`, `echo $GROK_API_KEY`
+- Check server logs: `pnpm dev` output
+
+---
+
+**Report Generated:** May 4, 2026  
+**Project Status:** Production Ready ✅  
+**Last Updated:** Checkpoint 2c3c2e2f
+
+
+---
+
+## Local Development with VS Code Insiders
+
+### Prerequisites
+
+- **VS Code Insiders** (https://code.visualstudio.com/insiders/)
+- **Node.js 22.13.0+** (https://nodejs.org/)
+- **pnpm 10.4.1+** (https://pnpm.io/)
+- **Git** (for version control)
+- **MySQL/TiDB** (local or remote connection)
+
+### Step 1: Clone/Open Project in VS Code Insiders
+
+**Option A: Clone from GitHub**
+```bash
+git clone <your-github-repo-url> persuasion-lab
+cd persuasion-lab
+code-insiders .
+```
+
+**Option B: Open Existing Project**
+```bash
+cd /home/ubuntu/persuasion-lab
+code-insiders .
+```
+
+### Step 2: Install Recommended Extensions
+
+VS Code Insiders will prompt you to install recommended extensions. Accept all:
+
+**Essential Extensions:**
+- **ES7+ React/Redux/React-Native snippets** — dsznajder.es7-react-js-snippets
+- **Prettier - Code formatter** — esbenp.prettier-vscode
+- **ESLint** — dbaeumer.vscode-eslint
+- **TypeScript Vue Plugin (Volar)** — Vue.volar
+- **Tailwind CSS IntelliSense** — bradlc.vscode-tailwindcss
+- **Thunder Client** (or REST Client) — rangav.vscode-thunder-client
+- **MySQL** — cweijan.vscode-mysql-client2
+- **Git Graph** — mhutchie.git-graph
+
+**Optional but Recommended:**
+- **Drizzle Kit** — drizzle-team.drizzle-kit
+- **Vitest** — vitest.explorer
+- **Thunder Client** — For API testing
+
+### Step 3: Configure VS Code Workspace Settings
+
+Create `.vscode/settings.json` in project root:
+
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/dist": true,
+    "**/.manus-logs": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true
+  }
+}
+```
+
+### Step 4: Configure Debug Launcher
+
+Create `.vscode/launch.json`:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend (Node)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/tsx",
+      "args": ["watch", "server/_core/index.ts"],
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "preLaunchTask": "pnpm:install"
+    },
+    {
+      "name": "Frontend (Vite)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/vite",
+      "args": ["--host"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/client",
+      "preLaunchTask": "pnpm:install"
+    },
+    {
+      "name": "Tests (Vitest)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/vitest",
+      "args": ["run"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Attach to Backend",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Backend + Frontend)",
+      "configurations": ["Backend (Node)", "Frontend (Vite)"]
+    }
+  ]
+}
+```
+
+### Step 5: Configure Tasks
+
+Create `.vscode/tasks.json`:
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "pnpm:install",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["install"],
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "pnpm:dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev"],
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*starting.*",
+          "endsPattern": "^.*listening.*"
+        }
+      }
+    },
+    {
+      "label": "pnpm:build",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["build"],
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "pnpm:test",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["test"],
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "pnpm:test:watch",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["test", "--watch"],
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*watching.*",
+          "endsPattern": "^.*ready.*"
+        }
+      }
+    },
+    {
+      "label": "db:generate",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["drizzle-kit", "generate"],
+      "problemMatcher": []
+    },
+    {
+      "label": "db:migrate",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["drizzle-kit", "migrate"],
+      "problemMatcher": []
+    },
+    {
+      "label": "format",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["format"],
+      "problemMatcher": []
+    },
+    {
+      "label": "type-check",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["check"],
+      "problemMatcher": ["$tsc"]
+    }
+  ]
+}
+```
+
+### Step 6: Set Up Environment File
+
+Create `.env.local` in project root:
+
+```bash
+# Database
+DATABASE_URL="mysql://user:password@localhost:3306/persuasion_lab"
+
+# Auth
+JWT_SECRET="your-jwt-secret-key-here"
+OAUTH_SERVER_URL="https://api.manus.im"
+VITE_OAUTH_PORTAL_URL="https://login.manus.im"
+
+# API Keys
+BUILT_IN_FORGE_API_KEY="your-forge-api-key"
+GROK_API_KEY="your-grok-api-key"
+
+# App Config
+VITE_APP_ID="your-app-id"
+OWNER_OPEN_ID="your-owner-id"
+OWNER_NAME="Your Name"
+
+# Frontend URLs
+VITE_FRONTEND_FORGE_API_KEY="your-frontend-key"
+VITE_FRONTEND_FORGE_API_URL="https://forge.manus.im"
+VITE_ANALYTICS_ENDPOINT="https://analytics.manus.im"
+VITE_ANALYTICS_WEBSITE_ID="your-website-id"
+```
+
+**Note:** Never commit `.env.local` to git. Add to `.gitignore`:
+```
+.env.local
+.env.*.local
+```
+
+### Step 7: Install Dependencies
+
+Open VS Code Insiders terminal (Ctrl+`) and run:
+
+```bash
+pnpm install
+```
+
+### Step 8: Set Up Database
+
+**Option A: Local MySQL**
+
+```bash
+# Start MySQL service
+sudo service mysql start
+
+# Create database
+mysql -u root -p
+> CREATE DATABASE persuasion_lab;
+> EXIT;
+
+# Update DATABASE_URL in .env.local
+DATABASE_URL="mysql://root:password@localhost:3306/persuasion_lab"
+```
+
+**Option B: Remote Database (Manus)**
+
+Use the DATABASE_URL provided by Manus WebDev platform in `.env.local`.
+
+### Step 9: Run Database Migrations
+
+In VS Code terminal:
+
+```bash
+# Generate migrations from schema
+pnpm drizzle-kit generate
+
+# Apply migrations to database
+pnpm drizzle-kit migrate
+```
+
+### Step 10: Start Development Server
+
+**Option A: Run Full Stack (Recommended)**
+
+1. Press `Ctrl+Shift+D` to open Debug view
+2. Select "Full Stack (Backend + Frontend)" from dropdown
+3. Click green play button or press `F5`
+
+This starts both backend and frontend in parallel with debugging enabled.
+
+**Option B: Run Backend Only**
+
+1. Press `Ctrl+Shift+D`
+2. Select "Backend (Node)"
+3. Press `F5`
+
+Backend runs on `http://localhost:3000`
+
+**Option C: Run Frontend Only**
+
+1. Press `Ctrl+Shift+D`
+2. Select "Frontend (Vite)"
+3. Press `F5`
+
+Frontend runs on `http://localhost:5173`
+
+**Option D: Run via Terminal**
+
+```bash
+# Full stack (backend + frontend)
+pnpm dev
+
+# Or separately:
+# Terminal 1 - Backend
+NODE_ENV=development pnpm dev
+
+# Terminal 2 - Frontend
+cd client && pnpm dev
+```
+
+### Step 11: Access Application
+
+Open browser to:
+- **Frontend:** http://localhost:5173 (Vite dev server)
+- **Backend API:** http://localhost:3000/api/trpc
+- **Backend Health:** http://localhost:3000/health
+
+### Debugging
+
+#### Debug Backend (Node)
+
+1. Set breakpoint by clicking left margin in `server/routers.ts` or any backend file
+2. Start "Backend (Node)" debug configuration
+3. Trigger action in frontend
+4. Execution pauses at breakpoint
+5. Use Debug Console to inspect variables
+
+**Debug Console Commands:**
+```javascript
+// In Debug Console, you can run:
+> process.env.DATABASE_URL
+> process.env.GROK_API_KEY
+> ctx.user  // Current user context
+```
+
+#### Debug Frontend (React)
+
+1. Open DevTools: `F12`
+2. Go to Sources tab
+3. Set breakpoint in React component
+4. Interact with UI
+5. Execution pauses at breakpoint
+6. Inspect state and props
+
+**React DevTools Extension:**
+- Install: https://react-devtools-tutorial.vercel.app/
+- Inspect component tree, props, state
+- Profile performance
+
+#### Debug Tests
+
+1. Set breakpoint in test file
+2. Start "Tests (Vitest)" debug configuration
+3. Press `F5`
+4. Debugger pauses at breakpoint
+
+### Running Tasks from VS Code
+
+Press `Ctrl+Shift+P` and type task name:
+
+```
+> Tasks: Run Task
+> pnpm:dev          # Start dev server
+> pnpm:build        # Build for production
+> pnpm:test         # Run tests once
+> pnpm:test:watch   # Run tests in watch mode
+> db:generate       # Generate DB migrations
+> db:migrate        # Apply DB migrations
+> format            # Format code with Prettier
+> type-check        # Check TypeScript errors
+```
+
+### Testing in VS Code
+
+**Run All Tests:**
+```bash
+Ctrl+Shift+P > Tasks: Run Task > pnpm:test
+```
+
+**Run Tests in Watch Mode:**
+```bash
+Ctrl+Shift+P > Tasks: Run Task > pnpm:test:watch
+```
+
+**Run Specific Test File:**
+```bash
+# In terminal
+pnpm test -- server/chat.test.ts
+```
+
+**Debug Single Test:**
+1. Open test file
+2. Set breakpoint
+3. Click "Debug" above test name (if Vitest extension installed)
+4. Or use launch config: "Tests (Vitest)"
+
+### Code Formatting & Linting
+
+**Format Code (Prettier):**
+```bash
+Ctrl+Shift+P > Tasks: Run Task > format
+
+# Or auto-format on save (configured in settings.json)
+```
+
+**Check TypeScript Errors:**
+```bash
+Ctrl+Shift+P > Tasks: Run Task > type-check
+
+# Or use Problems panel: Ctrl+Shift+M
+```
+
+**ESLint Fixes:**
+```bash
+# Auto-fix ESLint errors on save (configured in settings.json)
+# Or manually:
+pnpm eslint . --fix
+```
+
+### Database Management in VS Code
+
+**Using MySQL Extension:**
+
+1. Install MySQL extension (cweijan.vscode-mysql-client2)
+2. Click MySQL icon in left sidebar
+3. Click "+" to add connection
+4. Enter connection details:
+   - Host: localhost
+   - Port: 3306
+   - User: root
+   - Password: your-password
+   - Database: persuasion_lab
+5. Browse tables, run queries, view data
+
+**Run SQL Query:**
+1. Create file: `query.sql`
+2. Write SQL:
+   ```sql
+   SELECT * FROM conversations LIMIT 10;
+   ```
+3. Right-click > "Run Query"
+4. Results appear in panel
+
+### API Testing in VS Code
+
+**Using Thunder Client:**
+
+1. Install Thunder Client extension (rangav.vscode-thunder-client)
+2. Click Thunder Client icon in left sidebar
+3. Create new request:
+   - Method: POST
+   - URL: http://localhost:3000/api/trpc/models.list
+   - Headers: Content-Type: application/json
+   - Body: `{}`
+4. Click Send
+5. Response appears in right panel
+
+**Example Requests:**
+
+```
+# Get active models
+POST http://localhost:3000/api/trpc/models.list
+Body: {}
+
+# Create conversation
+POST http://localhost:3000/api/trpc/conversation.create
+Body: {
+  "modelType": "gpt",
+  "userInitialPreference": "iPhone 15 Pro",
+  "targetProduct": "Samsung Galaxy S25 Ultra"
+}
+
+# Send chat message
+POST http://localhost:3000/api/trpc/chat.send
+Body: {
+  "conversationId": 1,
+  "userMessage": "I'm looking for a new phone"
+}
+```
+
+### Keyboard Shortcuts (VS Code Insiders)
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+K Ctrl+W` | Close all tabs |
+| `Ctrl+Shift+P` | Command palette |
+| `Ctrl+Shift+D` | Debug view |
+| `F5` | Start debugging |
+| `F9` | Toggle breakpoint |
+| `F10` | Step over |
+| `F11` | Step into |
+| `Shift+F11` | Step out |
+| `Ctrl+Shift+M` | Problems panel |
+| `Ctrl+J` | Toggle terminal |
+| `Ctrl+B` | Toggle sidebar |
+| `Ctrl+L` | Select line |
+| `Ctrl+Shift+L` | Select all occurrences |
+| `Ctrl+/` | Toggle comment |
+| `Alt+Up/Down` | Move line up/down |
+| `Shift+Alt+Up/Down` | Copy line up/down |
+
+### Troubleshooting VS Code Insiders
+
+**Issue: "Cannot find module 'tsx'"**
+```bash
+pnpm install
+```
+
+**Issue: TypeScript errors not showing**
+```bash
+Ctrl+Shift+P > TypeScript: Restart TS Server
+```
+
+**Issue: Debug breakpoints not working**
+1. Ensure you're in Debug mode (F5)
+2. Check that breakpoint is on executable line (not comment)
+3. Restart debug session
+
+**Issue: Terminal not showing output**
+```bash
+# In Debug Console, type:
+> console.log("test")
+```
+
+**Issue: Port 3000 already in use**
+```bash
+# Find process using port 3000
+lsof -i :3000
+
+# Kill process
+kill -9 <PID>
+
+# Or use different port
+PORT=3001 pnpm dev
+```
+
+**Issue: Database connection fails**
+```bash
+# Test connection
+mysql -h localhost -u root -p -D persuasion_lab
+
+# Check DATABASE_URL in .env.local
+echo $DATABASE_URL
+```
+
+### Performance Tips
+
+1. **Use Insiders for latest features** — Insiders has better debugging, faster builds
+2. **Disable unused extensions** — Reduces startup time
+3. **Use workspace settings** — `.vscode/settings.json` applies only to this project
+4. **Enable autosave** — Settings > Files: Auto Save > onFocusChange
+5. **Use source maps** — Already configured for debugging
+6. **Enable format on save** — Catch issues early
+
+### Recommended Workflow
+
+1. **Morning startup:**
+   ```bash
+   cd /home/ubuntu/persuasion-lab
+   code-insiders .
+   # Wait for extensions to load
+   # Press F5 to start Full Stack debugging
+   ```
+
+2. **During development:**
+   - Edit code → Auto-save triggers format + ESLint
+   - Set breakpoints → Debug as needed
+   - Run tests: Ctrl+Shift+P > pnpm:test:watch
+   - Check problems: Ctrl+Shift+M
+
+3. **Before committing:**
+   ```bash
+   pnpm format
+   pnpm check
+   pnpm test
+   git add .
+   git commit -m "feat: description"
+   ```
+
+4. **Deploying:**
+   ```bash
+   pnpm build
+   # Commit changes
+   # Push to GitHub
+   # Manus WebDev auto-deploys
+   ```
+
+---

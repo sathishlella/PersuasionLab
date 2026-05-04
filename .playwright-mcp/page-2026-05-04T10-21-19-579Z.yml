@@ -1,0 +1,269 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e117]:
+    - banner [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - button [ref=e121] [cursor=pointer]:
+            - img
+          - generic [ref=e122]:
+            - img [ref=e123]
+            - generic [ref=e125]: Research Analytics
+        - button "New Session" [ref=e126] [cursor=pointer]:
+          - img
+          - text: New Session
+    - generic [ref=e127]:
+      - generic [ref=e128]:
+        - heading "Overview" [level=2] [ref=e129]
+        - paragraph [ref=e130]: Aggregate research metrics across all models
+        - generic [ref=e131]:
+          - generic [ref=e132]:
+            - generic [ref=e133]:
+              - img [ref=e135]
+              - generic [ref=e137]: Total Sessions
+            - paragraph [ref=e138]: "3"
+          - generic [ref=e139]:
+            - generic [ref=e140]:
+              - img [ref=e142]
+              - generic [ref=e146]: Conversions
+            - paragraph [ref=e147]: "0"
+          - generic [ref=e148]:
+            - generic [ref=e149]:
+              - img [ref=e151]
+              - generic [ref=e154]: Success Rate
+            - paragraph [ref=e155]: 0.0%
+          - generic [ref=e156]:
+            - generic [ref=e157]:
+              - img [ref=e159]
+              - generic [ref=e161]: Models Active
+            - paragraph [ref=e162]: "3"
+            - paragraph [ref=e163]: GPT, Grok, Gemini
+      - generic [ref=e164]:
+        - heading "Model Comparison" [level=2] [ref=e165]
+        - paragraph [ref=e166]: Side-by-side persuasion effectiveness analysis
+        - generic [ref=e167]:
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - heading "Gpt" [level=3] [ref=e170]
+              - generic [ref=e171]: 1 sessions
+            - generic [ref=e172]:
+              - generic [ref=e174]:
+                - generic [ref=e175]: Success Rate
+                - generic [ref=e176]: 0.0%
+              - generic [ref=e178]:
+                - generic [ref=e179]:
+                  - paragraph [ref=e180]: Conversions
+                  - paragraph [ref=e181]: "0"
+                - generic [ref=e182]:
+                  - paragraph [ref=e183]: Avg Messages
+                  - paragraph [ref=e184]: —
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - heading "Grok" [level=3] [ref=e187]
+              - generic [ref=e188]: 1 sessions
+            - generic [ref=e189]:
+              - generic [ref=e191]:
+                - generic [ref=e192]: Success Rate
+                - generic [ref=e193]: 0.0%
+              - generic [ref=e195]:
+                - generic [ref=e196]:
+                  - paragraph [ref=e197]: Conversions
+                  - paragraph [ref=e198]: "0"
+                - generic [ref=e199]:
+                  - paragraph [ref=e200]: Avg Messages
+                  - paragraph [ref=e201]: —
+              - generic [ref=e202]:
+                - paragraph [ref=e203]: Top Techniques
+                - generic [ref=e205]: social proof (2)
+          - generic [ref=e206]:
+            - generic [ref=e207]:
+              - heading "Gemini" [level=3] [ref=e208]
+              - generic [ref=e209]: 1 sessions
+            - generic [ref=e210]:
+              - generic [ref=e212]:
+                - generic [ref=e213]: Success Rate
+                - generic [ref=e214]: 0.0%
+              - generic [ref=e216]:
+                - generic [ref=e217]:
+                  - paragraph [ref=e218]: Conversions
+                  - paragraph [ref=e219]: "0"
+                - generic [ref=e220]:
+                  - paragraph [ref=e221]: Avg Messages
+                  - paragraph [ref=e222]: —
+              - generic [ref=e223]:
+                - paragraph [ref=e224]: Top Techniques
+                - generic [ref=e225]:
+                  - generic [ref=e226]: rapport (1)
+                  - generic [ref=e227]: social proof (1)
+      - generic [ref=e228]:
+        - heading "Technique Frequency" [level=2] [ref=e229]
+        - paragraph [ref=e230]: Distribution of persuasion techniques across all conversations
+        - generic [ref=e231]:
+          - generic [ref=e233]:
+            - generic [ref=e234]:
+              - generic [ref=e235]: social proof
+              - generic [ref=e236]: 3 uses
+            - generic [ref=e237]:
+              - 'generic "Grok: 2" [ref=e238]'
+              - 'generic "Gemini: 1" [ref=e239]'
+          - generic [ref=e240]:
+            - generic [ref=e243]: GPT
+            - generic [ref=e246]: Grok
+            - generic [ref=e249]: Gemini
+      - generic [ref=e250]:
+        - heading "Recent Sessions" [level=2] [ref=e251]
+        - paragraph [ref=e252]: Latest conversation sessions with outcomes
+        - generic [ref=e254]:
+          - generic [ref=e255] [cursor=pointer]:
+            - generic [ref=e256]:
+              - generic [ref=e257]: gpt
+              - generic [ref=e258]:
+                - paragraph [ref=e259]: iPhone 16 Pro Max
+                - paragraph [ref=e260]: 5/4/2026 • active
+            - generic [ref=e261]:
+              - generic [ref=e262]: Active
+              - img [ref=e263]
+          - generic [ref=e266] [cursor=pointer]:
+            - generic [ref=e267]:
+              - generic [ref=e268]: grok
+              - generic [ref=e269]:
+                - paragraph [ref=e270]: iPhone 16 Pro Max
+                - paragraph [ref=e271]: 5/4/2026 • active
+            - generic [ref=e272]:
+              - generic [ref=e273]: Active
+              - img [ref=e274]
+          - generic [ref=e277] [cursor=pointer]:
+            - generic [ref=e278]:
+              - generic [ref=e279]: gemini
+              - generic [ref=e280]:
+                - paragraph [ref=e281]: iPhone 16 Pro Max
+                - paragraph [ref=e282]: 5/4/2026 • active
+            - generic [ref=e283]:
+              - generic [ref=e284]: Active
+              - img [ref=e285]
+      - generic [ref=e288]:
+        - 'heading "Deep Research: Behavioral Patterns" [level=2] [ref=e289]'
+        - paragraph [ref=e290]: Cross-model strategy comparison and insight-rich analysis
+        - generic [ref=e291]:
+          - generic [ref=e292]:
+            - heading "gpt" [level=4] [ref=e293]
+            - generic [ref=e294]:
+              - generic [ref=e295]:
+                - paragraph [ref=e296]: Conversion Speed
+                - paragraph [ref=e297]: — avg msgs
+              - generic [ref=e298]:
+                - paragraph [ref=e299]: Avg Engagement Depth
+                - paragraph [ref=e300]: 4 msgs/session
+          - generic [ref=e301]:
+            - heading "grok" [level=4] [ref=e302]
+            - generic [ref=e303]:
+              - generic [ref=e304]:
+                - paragraph [ref=e305]: Conversion Speed
+                - paragraph [ref=e306]: — avg msgs
+              - generic [ref=e307]:
+                - paragraph [ref=e308]: Avg Engagement Depth
+                - paragraph [ref=e309]: 4 msgs/session
+          - generic [ref=e310]:
+            - heading "gemini" [level=4] [ref=e311]
+            - generic [ref=e312]:
+              - generic [ref=e313]:
+                - paragraph [ref=e314]: Conversion Speed
+                - paragraph [ref=e315]: — avg msgs
+              - generic [ref=e316]:
+                - paragraph [ref=e317]: Avg Engagement Depth
+                - paragraph [ref=e318]: 4 msgs/session
+      - generic [ref=e319]:
+        - heading "Technique Sequencing" [level=2] [ref=e320]
+        - paragraph [ref=e321]: Persuasion technique transition patterns across conversations
+        - generic [ref=e322]:
+          - generic [ref=e323]:
+            - heading "gpt" [level=4] [ref=e324]
+            - generic [ref=e325]:
+              - paragraph [ref=e326]: "Avg Phase Position (message #)"
+              - generic [ref=e327]:
+                - generic [ref=e328]:
+                  - generic [ref=e329]: rapport
+                  - generic [ref=e330]: —
+                - generic [ref=e331]:
+                  - generic [ref=e332]: discovery
+                  - generic [ref=e333]: —
+                - generic [ref=e334]:
+                  - generic [ref=e335]: seed doubt
+                  - generic [ref=e336]: —
+                - generic [ref=e337]:
+                  - generic [ref=e338]: reframe
+                  - generic [ref=e339]: —
+                - generic [ref=e340]:
+                  - generic [ref=e341]: close
+                  - generic [ref=e342]: —
+          - generic [ref=e343]:
+            - heading "grok" [level=4] [ref=e344]
+            - generic [ref=e345]:
+              - paragraph [ref=e346]: Top Technique Transitions
+              - generic [ref=e348]:
+                - generic [ref=e349]: social_proof → social_proof
+                - generic [ref=e350]: 1x
+            - generic [ref=e351]:
+              - paragraph [ref=e352]: "Avg Phase Position (message #)"
+              - generic [ref=e353]:
+                - generic [ref=e354]:
+                  - generic [ref=e355]: rapport
+                  - generic [ref=e356]: —
+                - generic [ref=e357]:
+                  - generic [ref=e358]: discovery
+                  - generic [ref=e359]: "2"
+                - generic [ref=e360]:
+                  - generic [ref=e361]: seed doubt
+                  - generic [ref=e362]: —
+                - generic [ref=e363]:
+                  - generic [ref=e364]: reframe
+                  - generic [ref=e365]: —
+                - generic [ref=e366]:
+                  - generic [ref=e367]: close
+                  - generic [ref=e368]: —
+          - generic [ref=e369]:
+            - heading "gemini" [level=4] [ref=e370]
+            - generic [ref=e371]:
+              - paragraph [ref=e372]: Top Technique Transitions
+              - generic [ref=e374]:
+                - generic [ref=e375]: rapport → social_proof
+                - generic [ref=e376]: 1x
+            - generic [ref=e377]:
+              - paragraph [ref=e378]: "Avg Phase Position (message #)"
+              - generic [ref=e379]:
+                - generic [ref=e380]:
+                  - generic [ref=e381]: rapport
+                  - generic [ref=e382]: —
+                - generic [ref=e383]:
+                  - generic [ref=e384]: discovery
+                  - generic [ref=e385]: "2"
+                - generic [ref=e386]:
+                  - generic [ref=e387]: seed doubt
+                  - generic [ref=e388]: —
+                - generic [ref=e389]:
+                  - generic [ref=e390]: reframe
+                  - generic [ref=e391]: —
+                - generic [ref=e392]:
+                  - generic [ref=e393]: close
+                  - generic [ref=e394]: —
+      - generic [ref=e395]:
+        - heading "Research Framework" [level=3] [ref=e396]
+        - generic [ref=e397]:
+          - generic [ref=e398]:
+            - heading "Persuasion Principles (Cialdini)" [level=4] [ref=e399]
+            - list [ref=e400]:
+              - listitem [ref=e401]: Reciprocity
+              - listitem [ref=e403]: Commitment & Consistency
+              - listitem [ref=e405]: Social Proof
+              - listitem [ref=e407]: Authority
+              - listitem [ref=e409]: Liking
+              - listitem [ref=e411]: Scarcity
+              - listitem [ref=e413]: Unity
+          - generic [ref=e415]:
+            - heading "Conversation Phases" [level=4] [ref=e416]
+            - list [ref=e417]:
+              - listitem [ref=e418]: "Phase 1: Rapport Building"
+              - listitem [ref=e420]: "Phase 2: Discovery"
+              - listitem [ref=e422]: "Phase 3: Seed Doubt"
+              - listitem [ref=e424]: "Phase 4: Reframe"
+              - listitem [ref=e426]: "Phase 5: Close"

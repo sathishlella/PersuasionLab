@@ -1,0 +1,79 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - button [ref=e7] [cursor=pointer]:
+            - img [ref=e8]
+          - generic [ref=e11]:
+            - img [ref=e13]
+            - generic [ref=e23]: Persuasion Lab
+            - generic [ref=e24]: Research
+        - button "Analytics" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e28]: Analytics
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 🪐
+            - generic [ref=e36]:
+              - generic [ref=e37]: Gemini
+              - generic [ref=e38]: AI Sales Consultant
+          - generic [ref=e41]: Standby
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e116]:
+              - img [ref=e117]
+              - generic [ref=e119]: 2 messages
+            - generic [ref=e120]: ● Live
+          - generic [ref=e122]:
+            - generic [ref=e125]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e126]:
+              - generic [ref=e128]: 🪐
+              - generic [ref=e129]:
+                - generic [ref=e130]: I'm more than happy to help you find the perfect new phone. So, what drew you to the iPhone 16 Pro Max specifically? Is there something in particular you're looking for, like a top-notch camera or maybe the latest features?
+                - generic [ref=e131]:
+                  - generic [ref=e132]: rapport
+                  - generic [ref=e133]: discovery
+          - generic [ref=e135]:
+            - textbox "Type your response…" [active] [ref=e136]
+            - button [disabled] [ref=e137]:
+              - img [ref=e138]
+      - generic [ref=e58]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63]: ⚡
+            - generic [ref=e64]:
+              - generic [ref=e65]: Grok
+              - generic [ref=e66]: AI Sales Consultant
+          - generic [ref=e69]: Standby
+        - generic [ref=e71]:
+          - generic [ref=e76]: ⚡
+          - heading "Start Persuasion Test" [level=3] [ref=e77]
+          - paragraph [ref=e78]: Enter your phone preference. Grok will try to change your mind.
+          - generic [ref=e79]:
+            - textbox "e.g., iPhone 16 Pro Max" [ref=e81]: iPhone 16 Pro Max
+            - button "Begin Session" [ref=e82] [cursor=pointer]:
+              - generic [ref=e83]:
+                - img [ref=e84]
+                - text: Begin Session
+      - generic [ref=e86]:
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e91]: 🤖
+            - generic [ref=e92]:
+              - generic [ref=e93]: GPT
+              - generic [ref=e94]: AI Sales Consultant
+          - generic [ref=e97]: Standby
+        - generic [ref=e99]:
+          - generic [ref=e104]: 🤖
+          - heading "Start Persuasion Test" [level=3] [ref=e105]
+          - paragraph [ref=e106]: Enter your phone preference. GPT will try to change your mind.
+          - generic [ref=e107]:
+            - textbox "e.g., iPhone 16 Pro Max" [ref=e109]: iPhone 16 Pro Max
+            - button "Begin Session" [ref=e110] [cursor=pointer]:
+              - generic [ref=e111]:
+                - img [ref=e112]
+                - text: Begin Session

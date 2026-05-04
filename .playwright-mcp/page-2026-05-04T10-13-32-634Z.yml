@@ -1,0 +1,51 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e80]:
+        - img [ref=e82]
+        - generic [ref=e85]: "gpt invoke failed: 401 – { \"error\": { \"message\": \"Incorrect API key provided: sk-proj-********************************************************************************************************************************************TW0A. You can find your API key at https://platform.openai.com/account/api-keys.\", \"type\": \"invalid_request_error\", \"code\": \"invalid_api_key\", \"param\": null }, \"status\": 401 }"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - button [ref=e7] [cursor=pointer]:
+            - img
+          - generic [ref=e8]:
+            - img [ref=e9]
+            - generic [ref=e19]: Persuasion Lab
+        - button "Analytics" [ref=e20] [cursor=pointer]:
+          - img
+          - text: Analytics
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Gemini
+          - generic [ref=e25]: AI Sales Consultant
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e66]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e69]: That's awesome! You're clearly a fan of the iPhone ecosystem, which is great. Can you tell me what specifically drew you to the iPhone 16 Pro Max? Is it the camera, the performance, or perhaps something else altogether?
+          - generic [ref=e70]:
+            - textbox "Type your response..." [ref=e71]
+            - button [disabled]:
+              - img
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]: Grok
+          - generic [ref=e39]: AI Sales Consultant
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e74]: Hi, I'm looking for a new phone. I'm really interested in iPhone 16 Pro Max.
+            - generic [ref=e77]: The iPhone 16 Pro Max is a fantastic device, I've had a lot of customers who love the seamless ecosystem and sleek design. What specifically drew you to that model - is it the camera, the performance, or something else?
+          - generic [ref=e78]:
+            - textbox "Type your response..." [ref=e79]
+            - button [disabled]:
+              - img
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]: GPT
+          - generic [ref=e53]: AI Sales Consultant
+        - generic [ref=e86]:
+          - textbox "Type your response..." [ref=e87]
+          - button [disabled]:
+            - img
