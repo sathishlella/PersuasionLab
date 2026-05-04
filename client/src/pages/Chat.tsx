@@ -538,7 +538,7 @@ export default function Chat() {
       <div className="lg:hidden flex-1 min-h-0 overflow-hidden flex flex-col">
         <PanelHeader model={activeModel} sessionActive={activeSessions[activeModel]} />
         <div className="flex-1 min-h-0 overflow-hidden">
-          <ChatInterface model={activeModel} />
+          <ChatInterface key={activeModel} model={activeModel} />
         </div>
       </div>
     </div>
