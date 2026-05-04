@@ -471,13 +471,23 @@ export default function Chat() {
               </span>
             </div>
           </div>
-          <button
-            onClick={() => navigate("/analytics")}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all border border-transparent hover:border-border/40"
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Analytics</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.linkedin.com/in/sathishlella/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline text-[10px] text-muted-foreground/40 hover:text-accent/70 transition-colors duration-200"
+            >
+              Designed by <span className="underline underline-offset-2 decoration-transparent hover:decoration-accent/40">Sathish Lella</span>
+            </a>
+            <button
+              onClick={() => navigate("/analytics")}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all border border-transparent hover:border-border/40"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Analytics</span>
+            </button>
+          </div>
         </div>
       </header>
 

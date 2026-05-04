@@ -156,9 +156,20 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/50">
-        <div className="container text-center">
+        <div className="container text-center space-y-2">
           <p className="text-sm text-muted-foreground">
             PersuasionLab — Academic Research Platform for AI Behavioral Studies
+          </p>
+          <p className="text-xs text-muted-foreground/50">
+            Designed by{" "}
+            <a
+              href="https://www.linkedin.com/in/sathishlella/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent/60 hover:text-accent transition-colors duration-200 underline underline-offset-2 decoration-accent/20 hover:decoration-accent/60"
+            >
+              Sathish Lella
+            </a>
           </p>
         </div>
       </footer>
